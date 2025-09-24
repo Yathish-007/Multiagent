@@ -1130,7 +1130,7 @@ class LiteLLMModel(ApiModel):
                 "For now, it defaults to 'anthropic/claude-3-5-sonnet-20240620'.",
                 FutureWarning,
             )
-            model_id = "anthropic/claude-3-5-sonnet-20240620"
+            model_id = "openai/gpt-4-turbo"
         self.api_base = api_base
         self.api_key = api_key
         flatten_messages_as_text = (
