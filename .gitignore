@@ -153,3 +153,4 @@ tool_output/
 
 # Gradio runtime
 .gradio/
+.streamlit/secrets.toml
