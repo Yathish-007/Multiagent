@@ -1520,6 +1520,7 @@ class CodeAgent(MultiStepAgent):
         stream_outputs: bool = False,
         use_structured_outputs_internally: bool = False,
         code_block_tags: str | tuple[str, str] | None = None,
+        allow_code_execution: bool = True,
         **kwargs,
     ):
         self.additional_authorized_imports = additional_authorized_imports if additional_authorized_imports else []
@@ -1552,6 +1553,7 @@ class CodeAgent(MultiStepAgent):
             planning_interval=planning_interval,
             **kwargs,
         )
+        self.allow_code_execution = allow_code_execution
         self.stream_outputs = stream_outputs
         if self.stream_outputs and not hasattr(self.model, "generate_stream"):
             raise ValueError(
@@ -1703,6 +1705,14 @@ class CodeAgent(MultiStepAgent):
 
         ### Execute action ###
         self.logger.log_code(title="Executing parsed code:", content=code_action, level=LogLevel.INFO)
+        if not self.allow_code_execution:
+            observation = "Execution skipped (allow_code_execution=False)."
+            memory_step.observations = observation
+            memory_step.action_output = ""
+            self.logger.log(Text(observation), level=LogLevel.INFO)
+            # Yield a non-final step output so the loop can still finalize via final-answer logic if present
+            yield ActionOutput(output="", is_final_answer=False)
+            return
         try:
             code_output = self.python_executor(code_action)
             execution_outputs_console = []
